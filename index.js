@@ -17,11 +17,26 @@ const main = async () => {
     });
 
     await node.start(); // start libp2p node
-    console.log('libp2p listening at:');
+    console.log('libp2p is advertising:');
     node.multiaddrs.forEach(addr => console.log(`${addr.toString()}/p2p/${node.peerId.toB58String()}`));
 
-    await node.stop();  // stop libp2p node
-    console.log('libp2p stopped.');
+    // ping peer if received multiaddr 
+    if (process.argv.length >= 3) {
+        console.log(`Pinging remote peer at ${process.argv[2]}`);
+        const latency = await node.ping(process.argv[2]);
+        console.log(`Pinged ${process.argv[2]} in ${latency}ms`);
+    } else console.log('Argument expected remote multiaddr, skipping ping...');
+
+    const stop = async () => {
+        // stop libp2p node
+        await node.stop();
+        console.log('libp2p stopped');
+        process.exit(0);
+    }
+    
+    // always stop the socket before terminating process
+    process.on('SIGTERM', stop);
+    process.on('SIGINT', stop);
 }
 
-main()
+main().catch(console.error)
