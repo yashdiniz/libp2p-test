@@ -11,7 +11,7 @@ const n = libp2p.create({
     addresses: {
         // add a listen address (localhost) to accept TCP connections on a random port
         listen: [
-            '/ip4/127.0.0.1/tcp/0',
+            '/ip4/0.0.0.0/tcp/0',
         ]
     },
     modules: {
