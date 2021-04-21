@@ -99,9 +99,10 @@ const main = async () => {
 };
 
 const publish = async (message) => {
-    return await n.pubsub.publish('test', message);  // message gets marshaled into ByteBuffer and transmitted
+    const node = await n;
+    return node.pubsub.publish('test', message);  // message gets marshaled into ByteBuffer and transmitted
 }
 
 main().catch(console.error)
 
-module.exports = { n, publish };
+module.exports = { node: n, publish };
