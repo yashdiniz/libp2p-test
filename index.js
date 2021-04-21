@@ -7,6 +7,14 @@ const dht = require('libp2p-kad-dht')
 const Bootstrap = require('libp2p-bootstrap')
 const pubsub = require('libp2p-gossipsub')
 
+// ProtoBuf compiles the message into a byte buffer to hold the smallest footprint possible.
+const proto = require('protons')(`
+message Test {
+    required long timestamp = 1;
+    required string payload = 2;
+}
+`)
+
 let config = {
     modules: {
         transport: [TCP],
@@ -67,8 +75,7 @@ const n = libp2p.create(config);
 const main = async () => {
     const node = await n;
     await node.start(); // start libp2p node
-    console.log('libp2p is listening at:');
-    node.multiaddrs.forEach(addr => console.log(`${addr.toString()}/p2p/${node.peerId.toB58String()}`));
+    node.multiaddrs.forEach(addr => console.log(`libp2p listening: ${addr.toString()}/p2p/${node.peerId.toB58String()}`));
 
     // ping peer if received multiaddr 
     if (process.argv.length >= 3) {
@@ -84,7 +91,7 @@ const main = async () => {
         connection => console.log('Connected to %s', connection.remotePeer.toB58String()));
 
     // unmarshal and log the contents from the 'test' topic.
-    node.pubsub.subscribe('test', message => console.log('test PubSub:', message.toString()));
+    node.pubsub.subscribe('test', message => console.log('test PubSub:', proto.Test.decode(message.data)));
 
     const stop = async () => {
         // stop libp2p node
@@ -98,9 +105,12 @@ const main = async () => {
     process.on('SIGINT', stop);
 };
 
-const publish = async (message) => {
+const publish = async (payload) => {
     const node = await n;
-    return node.pubsub.publish('test', message);  // message gets marshaled into ByteBuffer and transmitted
+    return node.pubsub.publish('test', proto.Test.encode({
+        timestamp: Date.now(),
+        payload,
+    }));  // message gets marshaled into a ProtoBuf and transmitted
 }
 
 main().catch(console.error)
