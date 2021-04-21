@@ -11,7 +11,7 @@ const config = {
     addresses: {
         // add a listen address (localhost) to accept TCP connections on a random port
         listen: [
-            '/ip4/0.0.0.0/tcp/8080',
+            '/ip4/0.0.0.0/tcp/19000',
         ]
     },
     modules: {
