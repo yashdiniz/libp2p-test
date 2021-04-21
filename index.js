@@ -114,7 +114,7 @@ const publish = async (payload) => {
 }
 
 if (process.argv[2])   // if pinging, publish to prove pubsub works both ways
-    setInterval(() => publish("Test message" + new Date()), 5000);
+    setInterval(() => publish("Test message " + new Date()), 5000);
 
 main().catch(console.error)
 
