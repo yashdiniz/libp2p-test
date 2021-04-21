@@ -7,13 +7,7 @@ const dht = require('libp2p-kad-dht')
 const Bootstrap = require('libp2p-bootstrap')
 const pubsub = require('libp2p-gossipsub')
 
-const config = {
-    addresses: {
-        // add a listen address (localhost) to accept TCP connections on a random port
-        listen: [
-            '/ip4/0.0.0.0/tcp/19000',
-        ]
-    },
+let config = {
     modules: {
         transport: [TCP],
         connEncryption: [NOISE],
@@ -60,6 +54,14 @@ const config = {
         }
     }
 };
+if (!process.argv[2]) { // if not pinging, then listen...
+    config.addresses = {
+        // add a listen address (localhost) to accept TCP connections on a random port
+        listen: [
+            '/ip4/0.0.0.0/tcp/19000',
+        ]
+    };
+}
 const n = libp2p.create(config);
 
 const main = async () => {
