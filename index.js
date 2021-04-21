@@ -10,7 +10,7 @@ const pubsub = require('libp2p-gossipsub')
 // ProtoBuf compiles the message into a byte buffer to hold the smallest footprint possible.
 const proto = require('protons')(`
 message Test {
-    required long timestamp = 1;
+    required int64 timestamp = 1;
     required string payload = 2;
 }
 `)
