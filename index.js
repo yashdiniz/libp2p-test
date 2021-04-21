@@ -91,7 +91,7 @@ const main = async () => {
         connection => console.log('Connected to %s', connection.remotePeer.toB58String()));
 
     // unmarshal and log the contents from the 'test' topic.
-    node.pubsub.subscribe('test', message => console.log('test PubSub:', proto.Test.decode(message.data)));
+    node.pubsub.subscribe('test', message => console.log('test PubSub:', proto.Test.decode(message.data).payload));
 
     const stop = async () => {
         // stop libp2p node
