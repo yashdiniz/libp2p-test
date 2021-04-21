@@ -47,7 +47,7 @@ const n = libp2p.create({
         },
         pubsub: {   // The pubsub options (and defaults) can be found in the pubsub router documentation
             enabled: true,
-            emitSelf: false,    // whether the node should emit to self on publish
+            emitSelf: true,    // whether the node should emit to self on publish
         },
         dht: {      // The DHT options (and defaults) can be found in its documentation
             kBucketSize: 20,
@@ -79,6 +79,9 @@ const main = async () => {
 
     node.connectionManager.on('peer:connect',
         connection => console.log('Connected to %s', connection.remotePeer.toB58String()));
+
+    node.pubsub.subscribe('test', message => console.log('PubSub:', message));
+    // node.pubsub.publish('test', "Message");  // message gets marshaled into ByteBuffer and transmitted
 
     const stop = async () => {
         // stop libp2p node
