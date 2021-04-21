@@ -7,13 +7,7 @@ const dht = require('libp2p-kad-dht')
 const Bootstrap = require('libp2p-bootstrap')
 const pubsub = require('libp2p-gossipsub')
 
-const n = libp2p.create({
-    addresses: {
-        // add a listen address (localhost) to accept TCP connections on a random port
-        listen: [
-            '/ip4/0.0.0.0/tcp/0',
-        ]
-    },
+let config = {
     modules: {
         transport: [TCP],
         connEncryption: [NOISE],
@@ -59,7 +53,16 @@ const n = libp2p.create({
             }
         }
     }
-});
+};
+if(!process.argv[2]) {  // if not pinging node... Be a listener
+    config.addresses = {
+        // add a listen address (localhost) to accept TCP connections on a random port
+        listen: [
+            '/ip4/0.0.0.0/tcp/0',
+        ]
+    };
+}
+const n = libp2p.create(config);
 
 const main = async () => {
     const node = await n;
@@ -80,8 +83,8 @@ const main = async () => {
     node.connectionManager.on('peer:connect',
         connection => console.log('Connected to %s', connection.remotePeer.toB58String()));
 
-    node.pubsub.subscribe('test', message => console.log('PubSub:', message));
-    // node.pubsub.publish('test', "Message");  // message gets marshaled into ByteBuffer and transmitted
+    // unmarshal and log the contents from the 'test' topic.
+    node.pubsub.subscribe('test', message => console.log('test PubSub:', message.toString()));
 
     const stop = async () => {
         // stop libp2p node
@@ -93,8 +96,12 @@ const main = async () => {
     // always stop the socket before terminating process
     process.on('SIGTERM', stop);
     process.on('SIGINT', stop);
+};
+
+const publish = async (message) => {
+    return await n.pubsub.publish('test', message);  // message gets marshaled into ByteBuffer and transmitted
 }
 
 main().catch(console.error)
 
-module.exports = n;
+module.exports = { n, publish };
