@@ -1,8 +1,10 @@
 const libp2p = require('libp2p')
 const TCP = require('libp2p-tcp')
+const MDNS = require('libp2p-mdns')
 const { NOISE } = require('libp2p-noise')
 const MPLEX = require('libp2p-mplex')
-const MDNS = require('libp2p-mdns')
+const wrtc = require('wrtc')
+const WebRTCStar = require('libp2p-webrtc-star')
 const dht = require('libp2p-kad-dht')
 const Bootstrap = require('libp2p-bootstrap')
 const pubsub = require('libp2p-gossipsub')
@@ -17,10 +19,10 @@ message Test {
 
 let config = {
     modules: {
-        transport: [TCP],
+        transport: [TCP, WebRTCStar],
         connEncryption: [NOISE],
         streamMuxer: [MPLEX],
-        peerDiscovery: [MDNS, /*Bootstrap*/],
+        peerDiscovery: [MDNS, Bootstrap],
         dht,
         pubsub,
     },
@@ -35,31 +37,35 @@ let config = {
             // The associated object, will be passed to the service when it is instantiated.
             [MDNS.tag]: {   //Refer: https://github.com/libp2p/js-libp2p/blob/master/doc/CONFIGURATION.md#peer-discovery
                 interval: 1000,
-                enabled: true
+                enabled: false
+            },
+            [WebRTCStar.tag]: {
+                enabled: true,
+                wrtc,
             },
             [Bootstrap.tag]: {
-                enabled: true,
+                enabled: false,
                 list: [
                     '/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb',
-                    '/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN'
+                '/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN'
                 ]
             },
-            interval: 2000,
-            enabled: true
+interval: 2000,
+    enabled: true
         },
-        pubsub: {   // The pubsub options (and defaults) can be found in the pubsub router documentation
-            enabled: true,
-            emitSelf: true,    // whether the node should emit to self on publish
+pubsub: {   // The pubsub options (and defaults) can be found in the pubsub router documentation
+    enabled: true,
+        emitSelf: true,    // whether the node should emit to self on publish
         },
-        dht: {      // The DHT options (and defaults) can be found in its documentation
-            kBucketSize: 20,
-            enabled: true,
+dht: {      // The DHT options (and defaults) can be found in its documentation
+    kBucketSize: 20,
+        enabled: true,
             randomWalk: {
-                enabled: true,  // Allows to disable discovery (enabled by default)
-                interval: 300e3,
+        enabled: true,  // Allows to disable discovery (enabled by default)
+            interval: 300e3,
                 timeout: 10e3
-            }
-        }
+    }
+}
     }
 };
 if (!process.argv[2]) { // if not pinging, then listen...
