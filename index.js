@@ -19,13 +19,13 @@ message Test {
 
 let config = {
     modules: {
-        transport: [TCP, new WebRTCStar({
+        transport: [TCP, /*new WebRTCStar({
             upgrader: {
                 upgradeInbound: maConn => maConn,
                 upgradeOutbound: maConn => maConn,
             },
             wrtc
-        })],
+        })*/],
         connEncryption: [NOISE],
         streamMuxer: [MPLEX],
         // peerDiscovery: [MDNS, Bootstrap],
