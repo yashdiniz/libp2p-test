@@ -19,13 +19,20 @@ message Test {
 
 let config = {
     modules: {
-        transport: [TCP, WebRTCStar],
+        transport: [TCP, new WebRTCStar({
+            upgrader: {
+                upgradeInbound: maConn => maConn,
+                upgradeOutbound: maConn => maConn,
+            },
+            wrtc
+        })],
         connEncryption: [NOISE],
         streamMuxer: [MPLEX],
-        peerDiscovery: [MDNS, Bootstrap],
+        // peerDiscovery: [MDNS, Bootstrap],
         dht,
         pubsub,
     },
+    signalling: ['/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star'],
     connectionManager: {
         maxConnections: Infinity,
         minConnections: 0,
@@ -47,25 +54,25 @@ let config = {
                 enabled: false,
                 list: [
                     '/dnsaddr/bootstrap.libp2p.io/p2p/QmbLHAnMoJPWSCR5Zhtx6BHJX9KiKNN6tpvbUcqanj75Nb',
-                '/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN'
+                    '/dnsaddr/bootstrap.libp2p.io/p2p/QmNnooDu7bfjPFoTZYxMNLWUQJyrVwtbZg5gBMjTezGAJN'
                 ]
             },
-interval: 2000,
-    enabled: true
+            interval: 2000,
+            enabled: true
         },
-pubsub: {   // The pubsub options (and defaults) can be found in the pubsub router documentation
-    enabled: true,
-        emitSelf: true,    // whether the node should emit to self on publish
+        pubsub: {   // The pubsub options (and defaults) can be found in the pubsub router documentation
+            enabled: true,
+            emitSelf: true,    // whether the node should emit to self on publish
         },
-dht: {      // The DHT options (and defaults) can be found in its documentation
-    kBucketSize: 20,
-        enabled: true,
+        dht: {      // The DHT options (and defaults) can be found in its documentation
+            kBucketSize: 20,
+            enabled: true,
             randomWalk: {
-        enabled: true,  // Allows to disable discovery (enabled by default)
-            interval: 300e3,
+                enabled: true,  // Allows to disable discovery (enabled by default)
+                interval: 300e3,
                 timeout: 10e3
-    }
-}
+            }
+        }
     }
 };
 if (!process.argv[2]) { // if not pinging, then listen...
@@ -81,6 +88,10 @@ const n = libp2p.create(config);
 const main = async () => {
     const node = await n;
     await node.start(); // start libp2p node
+
+    node.dial(config.signalling[0] + `/p2p/${node.peerId.toB58String()}`);
+    console.log('Signalled:', config.signalling[0] + `/p2p/${node.peerId.toB58String()}`);
+
     node.multiaddrs.forEach(addr => console.log(`libp2p listening: ${addr.toString()}/p2p/${node.peerId.toB58String()}`));
 
     // ping peer if received multiaddr 
