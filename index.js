@@ -89,8 +89,8 @@ const main = async () => {
     const node = await n;
     await node.start(); // start libp2p node
 
-    node.dial(config.signalling[0] + `/p2p/${node.peerId.toB58String()}`);
-    console.log('Signalled:', config.signalling[0] + `/p2p/${node.peerId.toB58String()}`);
+    // node.dial(config.signalling[0] + `/p2p/${node.peerId.toB58String()}`);
+    // console.log('Signalled:', config.signalling[0] + `/p2p/${node.peerId.toB58String()}`);
 
     node.multiaddrs.forEach(addr => console.log(`libp2p listening: ${addr.toString()}/p2p/${node.peerId.toB58String()}`));
 
